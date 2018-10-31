@@ -1,0 +1,103 @@
+--------------------
+create PROC [dbo].[sp_CheckLenhKhopPhatSinh]
+@malenh int
+AS
+BEGIN
+	if EXISTS(select * from dbo.LENHKHOP where dbo.LENHKHOP.MALENHDAT = @malenh )
+		return 1;
+		return 0;
+End
+--------------------
+create PROC [dbo].[sp_MaTKNH]
+@matk nchar(10)
+AS
+BEGIN
+	select MATKNH,SODU from dbo.TKNGANHANG where MATK = @matk
+End
+create PROC [dbo].[sp_MaLenhDat]
+AS
+BEGIN
+ select MAX(malenh) as max from LINK0.CHUNGKHOAN.dbo.LENHDAT
+END
+--------------------
+create PROC [dbo].[SP_DANGNHAP] 
+@TENLOGIN NVARCHAR (50)
+AS
+DECLARE @TENUSER NVARCHAR (50)
+SELECT @TENUSER=NAME FROM sys.sysusers WHERE sid=SUSER_SID(@TENLOGIN)
+if exists(SELECT HONV + ' ' + TENNV FROM NHANVIEN WHERE MANV=@TENUSER)
+SELECT USERNAME = @TENUSER, 
+	HOTENNV= (SELECT HONV + ' ' + TENNV FROM NHANVIEN WHERE MANV=@TENUSER), 
+	TENNHOM=NAME FROM sys.sysusers 
+	WHERE UID = (SELECT GROUPUID 
+		FROM sys.sysmembers
+	WHERE MEMBERUID=(SELECT UID FROM sys.sysusers WHERE NAME=@TENUSER))
+else
+ SELECT USERNAME = @TENUSER,
+	HOTENNDT = (SELECT HONDT + ' ' + TENNDT FROM NHADAUTU WHERE MATK=@TENUSER),
+	TENNHOM=NAME FROM sys.sysusers 
+	WHERE UID = (SELECT GROUPUID 
+		FROM sys.sysmembers
+	WHERE MEMBERUID=(SELECT UID FROM sys.sysusers WHERE NAME=@TENUSER))
+  --------------------
+  create PROC [dbo].[sp_CheckMaTKNH]
+@MATK nchar(20)
+AS
+BEGIN
+	if EXISTS(select * from dbo.TKNGANHANG where dbo.TKNGANHANG.MATK = @MATK )
+	begin
+		select * from dbo.TKNGANHANG where dbo.TKNGANHANG.MATK = @MATK 
+	end
+	else if EXISTS(select * from LINK0.CHUNGKHOAN.dbo.TKNGANHANG as P where p.MATK = @MATK )
+	begin
+		select * from LINK0.CHUNGKHOAN.dbo.TKNGANHANG as nv where nv.MATK= @MATK 
+	end
+END
+--------------------
+create PROC [dbo].[SP_CheckMANV]
+@MANV nchar(6)
+AS
+BEGIN
+	if EXISTS(select * from dbo.NHANVIEN where dbo.NHANVIEN.MANV = @MANV)
+	begin
+		select MANV,HONV,TENNV from dbo.NHANVIEN where dbo.NHANVIEN.MANV = @MANV
+	end
+	else if EXISTS(select * from LINK0.CHUNGKHOAN.dbo.NHANVIEN as P where p.MANV = @MANV)
+	begin
+		select MANV,HONV,TENNV from LINK0.CHUNGKHOAN.dbo.NHANVIEN as nv where nv.MANV = @MANV
+	end
+END
+--------------------
+create PROC [dbo].[sp_CheckMaNDT]
+@MATK nchar(10)
+AS
+BEGIN
+	if EXISTS(select * from dbo.NHADAUTU where dbo.NHADAUTU.MATK = @MATK )
+	begin
+		select MATK,HONDT,TENNDT from dbo.NHADAUTU where dbo.NHADAUTU.MATK = @MATK 
+	end
+	else if EXISTS(select * from LINK0.CHUNGKHOAN.dbo.NHADAUTU as P where p.MATK = @MATK )
+	begin
+		select MATK,HONDT,TENNDT from LINK0.CHUNGKHOAN.dbo.NHADAUTU as nv where nv.MATK= @MATK 
+	end
+END
+--------------------
+create PROC [dbo].[sp_CheckMaGD]
+@matk nchar(10),
+@magd nchar(10),
+@mkdatlenh nchar(10)
+AS
+BEGIN
+	if EXISTS(select * from dbo.NHADAUTU where MATK = @matk and MAGD = @magd and MKDATLENH = @mkdatlenh)
+		return 1;
+return 0;
+End
+PROC [dbo].[sp_CheckMaCP]
+@MACP nchar(6)
+AS
+BEGIN
+	if EXISTS(select * from dbo.COPHIEU where dbo.COPHIEU.MACP = @MACP )
+		select * from dbo.COPHIEU where dbo.COPHIEU.MACP = @MACP
+End
+--------------------
+create
